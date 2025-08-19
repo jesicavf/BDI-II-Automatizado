@@ -13,6 +13,12 @@
     button:hover { background: #005f99; }
     .autor { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: #666; }
   </style>
+<div class="datos">
+  <label>Nombre completo: <input type="text" id="nombre" required></label><br><br>
+  <label>Fecha de nacimiento: <input type="date" id="fnacimiento" required></label><br>
+  <p id="edad"></p>
+</div>
+
 </head>
 <body>
 <h1>Inventario de Depresión de Beck - II (BDI-II)</h1>
@@ -24,11 +30,7 @@ Marque el número correspondiente al enunciado elegido Si varios enunciados de u
   Verifique que no haya elegido más de uno por grupo, incluyendo el ítem 16 (cambios
 en los hábitos de Sueño) y el ítem 18 (cambios en el apetito).</p>
 
-<div class="datos">
-  <label>Nombre completo: <input type="text" id="nombre" required></label><br><br>
-  <label>Fecha de nacimiento: <input type="date" id="fnacimiento" required></label><br>
-  <p id="edad"></p>
-</div>
+
 
 <form id="bdiForm"></form>
 <button type="button" onclick="generarPDF()">Descargar Informe PDF</button>
