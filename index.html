@@ -16,7 +16,7 @@
 </head>
 <body>
 <h1>Inventario de Depresión de Beck - II (BDI-II)</h1>
-<p><b>Instrucciones:</b> Complete primero sus datos personales y luego responda cada grupo de afirmaciones. Marque un número por grupo. Si varios enunciados le parecen igualmente apropiados, marque el número más alto.</p>
+<p><b>Instrucciones:</b> Complete sus datos y luego responda cada grupo de afirmaciones. Marque un número por grupo. Si varios enunciados le parecen igualmente apropiados, marque el número más alto.</p>
 
 <div class="datos">
   <label>Nombre completo: <input type="text" id="nombre" required></label><br><br>
@@ -79,7 +79,7 @@ preguntas.forEach((p, i) => {
   form.appendChild(div);
 });
 
-// Calcular edad al seleccionar fecha
+// Calcular edad
 document.getElementById("fnacimiento").addEventListener("change",()=>{
   const fn = new Date(document.getElementById("fnacimiento").value);
   const hoy = new Date();
@@ -97,6 +97,7 @@ function generarPDF() {
   const doc = new jsPDF();
   let y = 10;
   let puntaje = 0;
+  let ideacionSuicida = false;
   const fechaAdmin = new Date().toLocaleDateString();
 
   doc.setFontSize(12);
@@ -111,21 +112,32 @@ function generarPDF() {
     if(!sel){ alert("Complete todas las preguntas"); return; }
     const valor = parseInt(sel.value);
     puntaje += valor;
+    if(i===8 && valor>0) ideacionSuicida = true; // ítem 9 ideación suicida
     doc.text(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`,10,y); y+=7;
     if(y>280){ doc.addPage(); y=10; }
   }
 
-  // Interpretación según baremos argentinos
-  let interpretacion="";
-  if(puntaje<=13) interpretacion="Mínima depresión";
-  else if(puntaje<=19) interpretacion="Depresión leve";
-  else if(puntaje<=28) interpretacion="Depresión moderada";
-  else interpretacion="Depresión grave";
+  // Interpretación y resumen según puntaje
+  let interpretacion="", resumen="";
+  if(puntaje<=13){
+    interpretacion="Mínima depresión";
+    resumen="No se observan síntomas depresivos clínicamente significativos.";
+  } else if(puntaje<=19){
+    interpretacion="Depresión leve";
+    resumen="Presenta síntomas leves de depresión; se recomienda seguimiento y estrategias de afrontamiento.";
+  } else if(puntaje<=28){
+    interpretacion="Depresión moderada";
+    resumen="Se observan síntomas moderados de depresión; se sugiere intervención psicológica y evaluación adicional.";
+  } else {
+    interpretacion="Depresión grave";
+    resumen="Se observan síntomas graves de depresión; se recomienda evaluación clínica urgente y posible tratamiento integral.";
+  }
 
   y+=5;
   doc.text(`Puntaje bruto: ${puntaje}`,10,y); y+=7;
   doc.text(`Interpretación: ${interpretacion}`,10,y); y+=7;
-  doc.text(`Resumen: Presenta síntomas compatibles con ${interpretacion.toLowerCase()}.`,10,y); y+=7;
+  doc.text(`Resumen: ${resumen}`,10,y); y+=7;
+  if(ideacionSuicida) doc.text("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.",10,y); y+=7;
   doc.text("Autoría: Jésica Favara",150,290);
 
   const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
