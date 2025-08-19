@@ -8,6 +8,7 @@
     body { font-family: Arial, sans-serif; margin: 20px; background: #f7f7f7; }
     h1 { text-align: center; color: #333; }
     .pregunta { margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+    .datos { margin-bottom: 20px; padding: 10px; background: #e6f2ff; border-radius: 8px; }
     button { padding: 10px 20px; background: #007acc; color: #fff; border: none; border-radius: 6px; cursor: pointer;}
     button:hover { background: #005f99; }
     .autor { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: #666; }
@@ -15,7 +16,13 @@
 </head>
 <body>
 <h1>Inventario de Depresión de Beck - II (BDI-II)</h1>
-<p><b>Instrucciones:</b> Este cuestionario consta de 21 grupos de afirmaciones. Lea cuidadosamente cada grupo y seleccione la opción que mejor describa cómo se ha sentido en las últimas dos semanas, incluyendo hoy. Marque un número por grupo. Si varios enunciados le parecen igualmente apropiados, marque el número más alto.</p>
+<p><b>Instrucciones:</b> Complete primero sus datos personales y luego responda cada grupo de afirmaciones. Marque un número por grupo. Si varios enunciados le parecen igualmente apropiados, marque el número más alto.</p>
+
+<div class="datos">
+  <label>Nombre completo: <input type="text" id="nombre" required></label><br><br>
+  <label>Fecha de nacimiento: <input type="date" id="fnacimiento" required></label><br>
+  <p id="edad"></p>
+</div>
 
 <form id="bdiForm"></form>
 <button type="button" onclick="generarPDF()">Descargar Informe PDF</button>
@@ -48,12 +55,10 @@ const opciones = [
   ["0. Tomo decisiones tan bien como siempre","1. Me resulta más difícil","2. Encuentro mucha más dificultad","3. Tengo problemas para tomar cualquier decisión"],
   ["0. No siento que no sea valioso","1. No me considero tan valioso como antes","2. Me siento menos valioso que otros","3. Siento que no valgo nada"],
   ["0. Tengo tanta energía como siempre","1. Tengo menos energía que antes","2. No tengo suficiente energía para hacer demasiado","3. No tengo energía suficiente para hacer nada"],
-  // Ítem 16 Sueño
   ["0. No he experimentado cambios","1a. Duermo un poco más que lo habitual","1b. Duermo un poco menos que lo habitual",
    "2a. Duermo mucho más que lo habitual","2b. Duermo mucho menos que lo habitual",
    "3a. Duermo la mayor parte del día","3b. Me despierto 1-2 horas más temprano y no puedo volver a dormirme"],
   ["0. No estoy más irritable","1. Estoy más irritable que lo habitual","2. Estoy mucho más irritable","3. Estoy irritable todo el tiempo"],
-  // Ítem 18 Apetito
   ["0. No he experimentado cambios","1a. Mi apetito es un poco menor que lo habitual","1b. Mi apetito es un poco mayor que lo habitual",
    "2a. Mi apetito es mucho menor que antes","2b. Mi apetito es mucho mayor que antes",
    "3a. No tengo apetito en absoluto","3b. Quiero comer todo el día"],
@@ -62,6 +67,7 @@ const opciones = [
   ["0. No he notado cambios en el interés por el sexo","1. Estoy menos interesado","2. Estoy mucho menos interesado","3. He perdido completamente el interés en el sexo"]
 ];
 
+// Generar preguntas
 const form = document.getElementById("bdiForm");
 preguntas.forEach((p, i) => {
   const div = document.createElement("div");
@@ -73,28 +79,44 @@ preguntas.forEach((p, i) => {
   form.appendChild(div);
 });
 
+// Calcular edad al seleccionar fecha
+document.getElementById("fnacimiento").addEventListener("change",()=>{
+  const fn = new Date(document.getElementById("fnacimiento").value);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fn.getFullYear();
+  if(hoy.getMonth()<fn.getMonth() || (hoy.getMonth()===fn.getMonth() && hoy.getDate()<fn.getDate())) edad--;
+  document.getElementById("edad").textContent = "Edad: "+edad+" años";
+});
+
 function generarPDF() {
+  const nombre = document.getElementById("nombre").value.trim();
+  const fnacimiento = document.getElementById("fnacimiento").value;
+  if(!nombre || !fnacimiento){ alert("Complete nombre y fecha de nacimiento"); return; }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   let y = 10;
   let puntaje = 0;
+  const fechaAdmin = new Date().toLocaleDateString();
 
   doc.setFontSize(12);
-  doc.text("Inventario de Depresión de Beck - II (BDI-II)", 10, y); y+=10;
+  doc.text("Inventario de Depresión de Beck - II (BDI-II)",10,y); y+=10;
+  doc.text(`Nombre: ${nombre}`,10,y); y+=7;
+  doc.text(`Fecha de nacimiento: ${fnacimiento}`,10,y); y+=7;
+  doc.text(`Fecha de administración: ${fechaAdmin}`,10,y); y+=10;
   doc.text("Respuestas seleccionadas:",10,y); y+=7;
 
-  for (let i=0; i<preguntas.length; i++) {
+  for(let i=0;i<preguntas.length;i++){
     const sel = document.querySelector(`input[name="p${i}"]:checked`);
-    if (!sel) { alert("Complete todas las preguntas"); return; }
+    if(!sel){ alert("Complete todas las preguntas"); return; }
     const valor = parseInt(sel.value);
     puntaje += valor;
-    doc.text(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`, 10, y);
-    y+=7;
+    doc.text(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`,10,y); y+=7;
     if(y>280){ doc.addPage(); y=10; }
   }
 
   // Interpretación según baremos argentinos
-  let interpretacion = "";
+  let interpretacion="";
   if(puntaje<=13) interpretacion="Mínima depresión";
   else if(puntaje<=19) interpretacion="Depresión leve";
   else if(puntaje<=28) interpretacion="Depresión moderada";
@@ -103,10 +125,11 @@ function generarPDF() {
   y+=5;
   doc.text(`Puntaje bruto: ${puntaje}`,10,y); y+=7;
   doc.text(`Interpretación: ${interpretacion}`,10,y); y+=7;
-  doc.text("Resumen: Presenta síntomas compatibles con "+interpretacion.toLowerCase()+".",10,y); y+=7;
+  doc.text(`Resumen: Presenta síntomas compatibles con ${interpretacion.toLowerCase()}.`,10,y); y+=7;
   doc.text("Autoría: Jésica Favara",150,290);
 
-  doc.save("Informe_BDI-II.pdf");
+  const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
+  doc.save(nombreArchivo);
 }
 </script>
 </body>
