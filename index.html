@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuestionario BDI-II</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    h1 { text-align: center; }
+    .question { margin-bottom: 15px; padding: 10px; background: #fff; border-radius: 8px; }
+    button { margin-top: 20px; padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; background: #007bff; color: #fff; }
+    #footer { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>Inventario de Depresión de Beck (BDI-II)</h1>
+  <form id="bdiForm">
+    <!-- Preguntas -->
+    <div id="questions"></div>
+    <button type="button" onclick="generateReport()">Descargar Informe</button>
+  </form>
+  <div id="footer">Autoría Jésica Favara</div>
+
+  <script>
+    const questions = [
+      "1. Tristeza", "2. Pesimismo", "3. Fracaso", "4. Pérdida de Placer", "5. Sentimientos de Culpa",
+      "6. Sentimientos de Castigo", "7. Disconformidad con uno mismo", "8. Autocrítica", "9. Pensamientos o Deseos Suicidas",
+      "10. Llanto", "11. Irritabilidad", "12. Pérdida de Interés", "13. Indecisión", "14. Desvalorización",
+      "15. Pérdida de Energía", "16. Cambios en los Hábitos de Sueño", "17. Irritabilidad", "18. Cambios en el Apetito",
+      "19. Dificultad de Concentración", "20. Cansancio o Fatiga", "21. Pérdida de Interés en el Sexo"
+    ];
+
+    const options = [
+      "0: No me siento triste",
+      "1: Me siento triste gran parte del tiempo",
+      "2: Estoy triste todo el tiempo",
+      "3: Me siento tan triste o infeliz que no lo puedo soportar"
+    ];
+
+    const container = document.getElementById("questions");
+    questions.forEach((q, i) => {
+      const div = document.createElement("div");
+      div.classList.add("question");
+      div.innerHTML = `<p>${q}</p>`;
+      options.forEach((opt, j) => {
+        div.innerHTML += `<label><input type="radio" name="q${i}" value="${j}" required> ${opt}</label><br>`;
+      });
+      container.appendChild(div);
+    });
+
+    function generateReport() {
+      const formData = new FormData(document.getElementById("bdiForm"));
+      let totalScore = 0;
+      let responses = "";
+      questions.forEach((q, i) => {
+        const val = formData.get("q"+i);
+        totalScore += parseInt(val);
+        responses += `${q}: ${options[val]}\n`;
+      });
+
+      let interpretation = "";
+      if (totalScore <= 13) interpretation = "Mínima depresión";
+      else if (totalScore <= 19) interpretation = "Depresión leve";
+      else if (totalScore <= 28) interpretation = "Depresión moderada";
+      else interpretation = "Depresión grave";
+
+      const report = `Informe BDI-II\n\nRespuestas:\n${responses}\nPuntaje total: ${totalScore}\nInterpretación: ${interpretation}\n\nResumen: El evaluado presenta un perfil compatible con ${interpretation}. Se sugiere complementar con evaluación clínica.`;
+
+      const blob = new Blob([report], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "informe_bdi.txt";
+      link.click();
+    }
+  </script>
+</body>
+</html>
