@@ -160,6 +160,16 @@ function generarPDF() {
   escribirTexto(`Resumen: ${resumen}`);
   if(ideacionSuicida) escribirTexto("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.");
 
+ // Leyenda profesional
+  y += 5;
+  doc.setFontSize(10);
+  doc.setTextColor(150, 0, 0);
+  escribirTexto("Este informe no reemplaza una evaluación integral realizada por un profesional competente.");
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(12);
+
+  // Autoría
+  doc.setTextColor(100,100,100);
   doc.text("Autoría: Jésica Favara", pageWidth-60, pageHeight-10);
 
   const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
