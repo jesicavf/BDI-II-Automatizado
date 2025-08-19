@@ -13,24 +13,21 @@
     button:hover { background: #005f99; }
     .autor { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: #666; }
   </style>
+</head>
+<body>
 <div class="datos">
   <label>Nombre completo: <input type="text" id="nombre" required></label><br><br>
   <label>Fecha de nacimiento: <input type="date" id="fnacimiento" required></label><br>
   <p id="edad"></p>
 </div>
 
-</head>
-<body>
 <h1>Inventario de Depresión de Beck - II (BDI-II)</h1>
 <p><b>Instrucciones:</b> Este cuestionario consta de 21 grupos de afirmaciones. Por favor, 
   lea con atención cada uno de ellos cuidadosamente. Luego elija uno de cada grupo, el que 
   mejor describa el modo como se ha sentido las últimas dos semanas, incluyendo el día de hoy.
-Marque el número correspondiente al enunciado elegido Si varios enunciados de un mismo grupo le 
+  Marque el número correspondiente al enunciado elegido. Si varios enunciados de un mismo grupo le 
   parecen igualmente apropiados, marque el número más alto. 
-  Verifique que no haya elegido más de uno por grupo, incluyendo el ítem 16 (cambios
-en los hábitos de Sueño) y el ítem 18 (cambios en el apetito).</p>
-
-
+  Verifique que no haya elegido más de uno por grupo, incluyendo el ítem 16 (cambios en los hábitos de Sueño) y el ítem 18 (cambios en el apetito).</p>
 
 <form id="bdiForm"></form>
 <button type="button" onclick="generarPDF()">Descargar Informe PDF</button>
@@ -75,7 +72,7 @@ const opciones = [
   ["0. No he notado cambios en el interés por el sexo","1. Estoy menos interesado","2. Estoy mucho menos interesado","3. He perdido completamente el interés en el sexo"]
 ];
 
-// Generar preguntas
+// Generar preguntas en formulario
 const form = document.getElementById("bdiForm");
 preguntas.forEach((p, i) => {
   const div = document.createElement("div");
@@ -96,6 +93,7 @@ document.getElementById("fnacimiento").addEventListener("change",()=>{
   document.getElementById("edad").textContent = "Edad: "+edad+" años";
 });
 
+// Función PDF con diseño
 function generarPDF() {
   const nombre = document.getElementById("nombre").value.trim();
   const fnacimiento = document.getElementById("fnacimiento").value;
@@ -111,24 +109,36 @@ function generarPDF() {
   let ideacionSuicida = false;
   const fechaAdmin = new Date().toLocaleDateString();
 
-  doc.setFontSize(12);
+  // Encabezado azul
+  doc.setFillColor(0, 102, 204);
+  doc.rect(0, 0, pageWidth, 15, 'F');
+  doc.setFontSize(14);
+  doc.setTextColor(255,255,255);
+  doc.text("Inventario de Depresión de Beck - II (BDI-II)", pageWidth/2, 11, {align: "center"});
+  y += 20;
 
-  function escribirTexto(texto) {
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+
+  function escribirTexto(texto, sombreado=false) {
     const lineas = doc.splitTextToSize(texto, pageWidth - 2*margen);
     lineas.forEach(linea => {
       if(y>pageHeight-margen) { doc.addPage(); y=margen; }
+      if(sombreado) {
+        const altura = 7;
+        doc.setFillColor(230,230,250);
+        doc.rect(margen-2, y-5, pageWidth-2*margen+4, altura, 'F');
+      }
       doc.text(linea, margen, y);
       y += 7;
     });
   }
 
-  escribirTexto("Inventario de Depresión de Beck - II (BDI-II)");
+  escribirTexto(`Nombre: ${nombre}`, true);
+  escribirTexto(`Fecha de nacimiento: ${fnacimiento}`, true);
+  escribirTexto(`Fecha de administración: ${fechaAdmin}`, true);
   y += 3;
-  escribirTexto(`Nombre: ${nombre}`);
-  escribirTexto(`Fecha de nacimiento: ${fnacimiento}`);
-  escribirTexto(`Fecha de administración: ${fechaAdmin}`);
-  y += 3;
-  escribirTexto("Respuestas seleccionadas:");
+  escribirTexto("Respuestas seleccionadas:", true);
 
   for(let i=0;i<preguntas.length;i++){
     const sel = document.querySelector(`input[name="p${i}"]:checked`);
@@ -136,7 +146,7 @@ function generarPDF() {
     const valor = parseInt(sel.value);
     puntaje += valor;
     if(i===8 && valor>0) ideacionSuicida = true;
-    escribirTexto(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`);
+    escribirTexto(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`, true);
   }
 
   let interpretacion="", resumen="";
@@ -155,20 +165,20 @@ function generarPDF() {
   }
 
   y += 3;
-  escribirTexto(`Puntaje bruto: ${puntaje}`);
-  escribirTexto(`Interpretación: ${interpretacion}`);
-  escribirTexto(`Resumen: ${resumen}`);
-  if(ideacionSuicida) escribirTexto("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.");
+  escribirTexto(`Puntaje bruto: ${puntaje}`, true);
+  escribirTexto(`Interpretación: ${interpretacion}`, true);
+  escribirTexto(`Resumen: ${resumen}`, true);
+  if(ideacionSuicida) escribirTexto("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.", true);
 
- // Leyenda profesional
+  // Leyenda profesional en rojo
   y += 5;
   doc.setFontSize(10);
   doc.setTextColor(150, 0, 0);
-  escribirTexto("Este informe no reemplaza una evaluación integral realizada por un profesional competente.");
+  escribirTexto("Este informe no reemplaza una evaluación integral realizada por un profesional competente.", true);
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(12);
 
-  // Autoría
+  // Autoría al pie
   doc.setTextColor(100,100,100);
   doc.text("Autoría: Jésica Favara", pageWidth-60, pageHeight-10);
 
