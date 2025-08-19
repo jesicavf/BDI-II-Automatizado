@@ -140,14 +140,29 @@ function generarPDF() {
   y += 3;
   escribirTexto("Respuestas seleccionadas:", true);
 
-  for(let i=0;i<preguntas.length;i++){
-    const sel = document.querySelector(`input[name="p${i}"]:checked`);
-    if(!sel){ alert("Complete todas las preguntas"); return; }
-    const valor = parseInt(sel.value);
-    puntaje += valor;
-    if(i===8 && valor>0) ideacionSuicida = true;
-    escribirTexto(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`, true);
-  }
+  // --- Reordenar preguntas por valor antes de imprimir ---
+const respuestasOrdenadas = [[],[],[],[]]; // índice 3 = valor 3, 2 = valor 2, etc.
+
+for(let i=0;i<preguntas.length;i++){
+  const sel = document.querySelector(`input[name="p${i}"]:checked`);
+  if(!sel){ alert("Complete todas las preguntas"); return; }
+  const valor = parseInt(sel.value);
+  puntaje += valor;
+  if(i===8 && valor>0) ideacionSuicida = true;
+
+  respuestasOrdenadas[valor].push({
+    numero: i+1,
+    pregunta: preguntas[i],
+    respuesta: opciones[i][valor]
+  });
+}
+
+// Imprimir respuestas ordenadas: primero 3, luego 2, luego 1, luego 0
+for(let valor=3; valor>=0; valor--){
+  respuestasOrdenadas[valor].forEach(item => {
+    escribirTexto(`${item.numero}. ${item.pregunta} -> ${item.respuesta}`, true);
+  });
+}
 
   let interpretacion="", resumen="";
   if(puntaje<=13){
