@@ -97,18 +97,15 @@ function generarPDF() {
   const doc = new jsPDF("p","mm","a4");
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margen = 15;
+  const margen = 10;
   let y = margen;
   let puntaje = 0;
   let ideacionSuicida = false;
   const fechaAdmin = new Date().toLocaleDateString();
 
-  doc.setFont("helvetica");
+  doc.setFontSize(12);
 
-  function escribirTexto(texto, color="black", tam=12, negrita=false) {
-    doc.setFontSize(tam);
-    doc.setTextColor(color);
-    doc.setFont("helvetica", negrita ? "bold":"normal");
+  function escribirTexto(texto) {
     const lineas = doc.splitTextToSize(texto, pageWidth - 2*margen);
     lineas.forEach(linea => {
       if(y>pageHeight-margen) { doc.addPage(); y=margen; }
@@ -117,18 +114,13 @@ function generarPDF() {
     });
   }
 
-  // Título grande
-  escribirTexto("Inventario de Depresión de Beck - II (BDI-II)", "#007acc", 16, true);
-  y += 5;
-  escribirTexto(`Nombre: ${nombre}`, "#005f99", 12, true);
-  escribirTexto(`Fecha de nacimiento: ${fnacimiento}`, "#005f99", 12);
-  escribirTexto(`Fecha de administración: ${fechaAdmin}`, "#005f99", 12);
+  escribirTexto("Inventario de Depresión de Beck - II (BDI-II)");
   y += 3;
-  doc.setDrawColor(0,123,204); doc.setLineWidth(0.5);
-  doc.line(margen, y, pageWidth-margen, y);
-  y += 5;
-  escribirTexto("Respuestas seleccionadas:", "#333", 12, true);
-  y += 2;
+  escribirTexto(`Nombre: ${nombre}`);
+  escribirTexto(`Fecha de nacimiento: ${fnacimiento}`);
+  escribirTexto(`Fecha de administración: ${fechaAdmin}`);
+  y += 3;
+  escribirTexto("Respuestas seleccionadas:");
 
   for(let i=0;i<preguntas.length;i++){
     const sel = document.querySelector(`input[name="p${i}"]:checked`);
@@ -136,13 +128,8 @@ function generarPDF() {
     const valor = parseInt(sel.value);
     puntaje += valor;
     if(i===8 && valor>0) ideacionSuicida = true;
-    let color = (i===8 && valor>0) ? "red":"black";
-    escribirTexto(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`, color, 12);
+    escribirTexto(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`);
   }
-
-  y += 3;
-  doc.line(margen, y, pageWidth-margen, y);
-  y += 5;
 
   let interpretacion="", resumen="";
   if(puntaje<=13){
@@ -156,4 +143,20 @@ function generarPDF() {
     resumen="Se observan síntomas moderados de depresión; se sugiere intervención psicológica y evaluación adicional.";
   } else {
     interpretacion="Depresión grave";
-    resumen="Se observan síntomas graves de depresión; se recomienda evaluación clínica urgente y posible tratamiento integral
+    resumen="Se observan síntomas graves de depresión; se recomienda evaluación clínica urgente y posible tratamiento integral.";
+  }
+
+  y += 3;
+  escribirTexto(`Puntaje bruto: ${puntaje}`);
+  escribirTexto(`Interpretación: ${interpretacion}`);
+  escribirTexto(`Resumen: ${resumen}`);
+  if(ideacionSuicida) escribirTexto("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.");
+
+  doc.text("Autoría: Jésica Favara", pageWidth-60, pageHeight-10);
+
+  const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
+  doc.save(nombreArchivo);
+}
+</script>
+</body>
+</html>
