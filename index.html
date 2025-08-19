@@ -195,9 +195,9 @@ for(let valor=3; valor>=0; valor--){
   doc.setFontSize(12);
 
   // Autoría al pie
-  doc.setFontSize(6);
-  doc.setTextColor(100,100,100);
-  doc.text("Autoría: Jésica Favara", pageWidth-60, pageHeight-10);
+doc.setFontSize(6);
+doc.setTextColor(100, 100, 100);
+doc.text("Autoría: Jésica Favara", pageWidth - 10, pageHeight - 10, { align: "right" });
 
   const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
   doc.save(nombreArchivo);
