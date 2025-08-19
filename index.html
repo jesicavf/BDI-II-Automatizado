@@ -139,7 +139,7 @@ function generarPDF() {
   escribirTexto(`Fecha de nacimiento: ${fnacimiento}`, true);
   escribirTexto(`Fecha de administración: ${fechaAdmin}`, true);
   y += 3;
-  escribirTexto("Respuestas seleccionadas:", true);
+  escribirTexto("Respuestas seleccionadas (ordenadas de mayor puntuación a menor puntuación):", true);
 
   // --- Reordenar preguntas por valor antes de imprimir ---
 const respuestasOrdenadas = [[],[],[],[]]; // índice 3 = valor 3, 2 = valor 2, etc.
