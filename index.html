@@ -1,180 +1,162 @@
-<!-- Guarda este archivo como bdi.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Evaluación BDI-II</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <title>BDI-II - Inventario de Depresión de Beck</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f9;
-      margin: 20px;
-      color: #333;
-    }
-    h1, h2 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .question {
-      background: #fff;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .result {
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 10px;
-      background: #ecf0f1;
-    }
-    .pdf-report {
-      padding: 30px;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
-    .pdf-report h2 {
-      color: #34495e;
-      border-bottom: 2px solid #3498db;
-      padding-bottom: 5px;
-    }
-    .pdf-report table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    .pdf-report table th, .pdf-report table td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    .pdf-report table th {
-      background-color: #3498db;
-      color: white;
-    }
-    .highlight {
-      color: #e74c3c;
-      font-weight: bold;
-    }
-    .footer-note {
-      margin-top: 20px;
-      font-size: 12px;
-      text-align: center;
-      color: #7f8c8d;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f7f7f7; }
+    h1 { text-align: center; color: #333; }
+    .pregunta { margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+    .datos { margin-bottom: 20px; padding: 10px; background: #e6f2ff; border-radius: 8px; }
+    button { padding: 10px 20px; background: #007acc; color: #fff; border: none; border-radius: 6px; cursor: pointer;}
+    button:hover { background: #005f99; }
+    .autor { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: #666; }
   </style>
 </head>
 <body>
-  <h1>Inventario de Depresión de Beck (BDI-II)</h1>
-  <form id="bdi-form">
-    <label>Nombre: <input type="text" id="nombre" required></label><br><br>
-    <label>Fecha de nacimiento: <input type="date" id="fecha-nacimiento" required></label><br><br>
-    
-    <div id="questions"></div>
-    <button type="submit">Finalizar y generar informe</button>
-  </form>
+<h1>Inventario de Depresión de Beck - II (BDI-II)</h1>
+<p><b>Instrucciones:</b> Complete sus datos y luego responda cada grupo de afirmaciones. Marque un número por grupo. Si varios enunciados le parecen igualmente apropiados, marque el número más alto.</p>
 
-  <div id="result" class="result" style="display:none;"></div>
+<div class="datos">
+  <label>Nombre completo: <input type="text" id="nombre" required></label><br><br>
+  <label>Fecha de nacimiento: <input type="date" id="fnacimiento" required></label><br>
+  <p id="edad"></p>
+</div>
 
-  <script>
-    const questions = [
-      "Tristeza","Pesimismo","Fracaso","Pérdida de Placer","Sentimientos de Culpa","Sentimientos de Castigo",
-      "Disconformidad con uno mismo","Autocrítica","Ideación suicida","Llanto","Agitación","Pérdida de interés",
-      "Indecisión","Desvalorización","Pérdida de Energía","Cambios en los hábitos de sueño","Irritabilidad",
-      "Cambios en el apetito","Dificultad de concentración","Cansancio o fatiga","Pérdida de interés en el sexo"
-    ];
+<form id="bdiForm"></form>
+<button type="button" onclick="generarPDF()">Descargar Informe PDF</button>
 
-    const options = [
-      "0 - No me siento triste.",
-      "1 - Me siento triste gran parte del tiempo.",
-      "2 - Me siento triste todo el tiempo.",
-      "3 - Me siento tan triste o infeliz que no puedo soportarlo."
-    ];
+<div class="autor">Autoría Jésica Favara</div>
 
-    const container = document.getElementById("questions");
+<script>
+const preguntas = [
+  "Tristeza", "Pesimismo", "Fracaso", "Pérdida de Placer", "Sentimientos de Culpa",
+  "Sentimientos de Castigo", "Disconformidad con uno mismo", "Autocrítica", "Pensamientos o Deseos Suicidas",
+  "Llanto", "Agitación", "Pérdida de Interés", "Indecisión", "Desvalorización",
+  "Pérdida de Energía", "Cambios en los Hábitos de Sueño", "Irritabilidad",
+  "Cambios en el Apetito", "Dificultad de Concentración", "Cansancio o Fatiga",
+  "Pérdida de Interés en el Sexo"
+];
 
-    questions.forEach((q, i) => {
-      const div = document.createElement("div");
-      div.className = "question";
-      div.innerHTML = `<h3>${i+1}. ${q}</h3>` + options.map((opt, idx) =>
-        `<label><input type="radio" name="q${i}" value="${idx}" required> ${opt}</label><br>`
-      ).join("");
-      container.appendChild(div);
+const opciones = [
+  ["0. No me siento triste.","1. Me siento triste gran parte del tiempo","2. Me siento triste todo el tiempo","3. Me siento tan triste o soy tan infeliz que no puedo soportarlo"],
+  ["0. No estoy desalentado respecto de mi futuro","1. Me siento más desalentado respecto del futuro que lo habitual","2. No espero que las cosas funcionen para mí","3. Siento que no hay esperanza para mi futuro y solo puede empeorar"],
+  ["0. No me siento como un fracasado","1. He fracasado más de lo que hubiera debido","2. Cuando miro hacia atrás veo muchos fracasos","3. Siento que como persona soy un fracaso total"],
+  ["0. Obtengo tanto placer como siempre","1. No disfruto tanto de las cosas como antes","2. Obtengo muy poco placer","3. No puedo obtener ningún placer"],
+  ["0. No me siento particularmente culpable","1. Me siento culpable por varias cosas","2. Me siento bastante culpable la mayor parte del tiempo","3. Me siento culpable todo el tiempo"],
+  ["0. No siento que esté siendo castigado","1. Siento que tal vez pueda ser castigado","2. Espero ser castigado","3. Siento que estoy siendo castigado"],
+  ["0. Siento acerca de mi lo mismo que siempre","1. He perdido la confianza en mí mismo","2. Estoy decepcionado conmigo mismo","3. No me gusto a mí mismo"],
+  ["0. No me critico ni me culpo más de lo habitual","1. Estoy más crítico conmigo mismo","2. Me critico por todos mis errores","3. Me culpo por todo lo malo que sucede"],
+  ["0. No tengo pensamientos de matarme","1. He tenido pensamientos pero no lo haría","2. Querría matarme","3. Me mataría si tuviera oportunidad"],
+  ["0. No lloro más de lo habitual","1. Lloro más de lo habitual","2. Lloro por cualquier pequeñez","3. Siento ganas de llorar pero no puedo"],
+  ["0. No estoy más inquieto que lo habitual","1. Me siento más inquieto","2. Estoy tan inquieto que me es difícil quedarme quieto","3. Debo estar siempre en movimiento"],
+  ["0. No he perdido interés en actividades o personas","1. Estoy menos interesado","2. He perdido casi todo interés","3. Me es difícil interesarme por algo"],
+  ["0. Tomo decisiones tan bien como siempre","1. Me resulta más difícil","2. Encuentro mucha más dificultad","3. Tengo problemas para tomar cualquier decisión"],
+  ["0. No siento que no sea valioso","1. No me considero tan valioso como antes","2. Me siento menos valioso que otros","3. Siento que no valgo nada"],
+  ["0. Tengo tanta energía como siempre","1. Tengo menos energía que antes","2. No tengo suficiente energía para hacer demasiado","3. No tengo energía suficiente para hacer nada"],
+  ["0. No he experimentado cambios","1a. Duermo un poco más que lo habitual","1b. Duermo un poco menos que lo habitual",
+   "2a. Duermo mucho más que lo habitual","2b. Duermo mucho menos que lo habitual",
+   "3a. Duermo la mayor parte del día","3b. Me despierto 1-2 horas más temprano y no puedo volver a dormirme"],
+  ["0. No estoy más irritable","1. Estoy más irritable que lo habitual","2. Estoy mucho más irritable","3. Estoy irritable todo el tiempo"],
+  ["0. No he experimentado cambios","1a. Mi apetito es un poco menor que lo habitual","1b. Mi apetito es un poco mayor que lo habitual",
+   "2a. Mi apetito es mucho menor que antes","2b. Mi apetito es mucho mayor que antes",
+   "3a. No tengo apetito en absoluto","3b. Quiero comer todo el día"],
+  ["0. Puedo concentrarme tan bien como siempre","1. No puedo concentrarme tan bien","2. Me es difícil mantener la mente","3. Encuentro que no puedo concentrarme en nada"],
+  ["0. No estoy más cansado que lo habitual","1. Me fatigo más","2. Estoy demasiado fatigado para muchas cosas","3. Estoy demasiado fatigado para la mayoría de las cosas"],
+  ["0. No he notado cambios en el interés por el sexo","1. Estoy menos interesado","2. Estoy mucho menos interesado","3. He perdido completamente el interés en el sexo"]
+];
+
+// Generar preguntas
+const form = document.getElementById("bdiForm");
+preguntas.forEach((p, i) => {
+  const div = document.createElement("div");
+  div.classList.add("pregunta");
+  div.innerHTML = `<b>${i+1}. ${p}</b><br>`;
+  opciones[i].forEach((op, j) => {
+    div.innerHTML += `<label><input type="radio" name="p${i}" value="${j}" required> ${op}</label><br>`;
+  });
+  form.appendChild(div);
+});
+
+// Calcular edad
+document.getElementById("fnacimiento").addEventListener("change",()=>{
+  const fn = new Date(document.getElementById("fnacimiento").value);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fn.getFullYear();
+  if(hoy.getMonth()<fn.getMonth() || (hoy.getMonth()===fn.getMonth() && hoy.getDate()<fn.getDate())) edad--;
+  document.getElementById("edad").textContent = "Edad: "+edad+" años";
+});
+
+function generarPDF() {
+  const nombre = document.getElementById("nombre").value.trim();
+  const fnacimiento = document.getElementById("fnacimiento").value;
+  if(!nombre || !fnacimiento){ alert("Complete nombre y fecha de nacimiento"); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p","mm","a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margen = 10;
+  let y = margen;
+  let puntaje = 0;
+  let ideacionSuicida = false;
+  const fechaAdmin = new Date().toLocaleDateString();
+
+  doc.setFontSize(12);
+
+  function escribirTexto(texto) {
+    const lineas = doc.splitTextToSize(texto, pageWidth - 2*margen);
+    lineas.forEach(linea => {
+      if(y>pageHeight-margen) { doc.addPage(); y=margen; }
+      doc.text(linea, margen, y);
+      y += 7;
     });
+  }
 
-    document.getElementById("bdi-form").addEventListener("submit", function(e){
-      e.preventDefault();
+  escribirTexto("Inventario de Depresión de Beck - II (BDI-II)");
+  y += 3;
+  escribirTexto(`Nombre: ${nombre}`);
+  escribirTexto(`Fecha de nacimiento: ${fnacimiento}`);
+  escribirTexto(`Fecha de administración: ${fechaAdmin}`);
+  y += 3;
+  escribirTexto("Respuestas seleccionadas:");
 
-      const nombre = document.getElementById("nombre").value;
-      const fecha = document.getElementById("fecha-nacimiento").value;
+  for(let i=0;i<preguntas.length;i++){
+    const sel = document.querySelector(`input[name="p${i}"]:checked`);
+    if(!sel){ alert("Complete todas las preguntas"); return; }
+    const valor = parseInt(sel.value);
+    puntaje += valor;
+    if(i===8 && valor>0) ideacionSuicida = true;
+    escribirTexto(`${i+1}. ${preguntas[i]} -> ${opciones[i][valor]}`);
+  }
 
-      let total = 0;
-      let respuestas = [];
+  let interpretacion="", resumen="";
+  if(puntaje<=13){
+    interpretacion="Mínima depresión";
+    resumen="No se observan síntomas depresivos clínicamente significativos.";
+  } else if(puntaje<=19){
+    interpretacion="Depresión leve";
+    resumen="Presenta síntomas leves de depresión; se recomienda seguimiento y estrategias de afrontamiento.";
+  } else if(puntaje<=28){
+    interpretacion="Depresión moderada";
+    resumen="Se observan síntomas moderados de depresión; se sugiere intervención psicológica y evaluación adicional.";
+  } else {
+    interpretacion="Depresión grave";
+    resumen="Se observan síntomas graves de depresión; se recomienda evaluación clínica urgente y posible tratamiento integral.";
+  }
 
-      questions.forEach((q, i) => {
-        const val = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
-        total += val;
-        respuestas.push({ pregunta: q, puntaje: val });
-      });
+  y += 3;
+  escribirTexto(`Puntaje bruto: ${puntaje}`);
+  escribirTexto(`Interpretación: ${interpretacion}`);
+  escribirTexto(`Resumen: ${resumen}`);
+  if(ideacionSuicida) escribirTexto("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.");
 
-      // Ordenar de mayor a menor
-      respuestas.sort((a,b) => b.puntaje - a.puntaje);
+  doc.text("Autoría: Jésica Favara", pageWidth-60, pageHeight-10);
 
-      let nivel = "";
-      if (total < 14) nivel = "Depresión mínima";
-      else if (total < 20) nivel = "Depresión leve";
-      else if (total < 29) nivel = "Depresión moderada";
-      else nivel = "Depresión grave";
-
-      let ideacion = respuestas.find(r => r.pregunta === "Ideación suicida" && r.puntaje > 0);
-
-      const resultDiv = document.getElementById("result");
-      resultDiv.style.display = "block";
-      resultDiv.innerHTML = `<h2>Resultados</h2>
-        <p><b>Total:</b> ${total} puntos</p>
-        <p><b>Nivel:</b> ${nivel}</p>
-        ${ideacion ? `<p class="highlight">⚠ Atención: El paciente refiere ideación suicida.</p>` : ""}
-        <button onclick="generarPDF('${nombre}','${fecha}',${total},'${nivel}',${ideacion ? true : false})">Descargar Informe PDF</button>`;
-    });
-
-    function generarPDF(nombre, fecha, total, nivel, ideacion) {
-      const respuestasOrdenadas = questions.map((q, i) => {
-        const val = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
-        return { pregunta: q, puntaje: val };
-      }).sort((a,b) => b.puntaje - a.puntaje);
-
-      let tabla = "<table><tr><th>Pregunta</th><th>Puntaje</th></tr>";
-      respuestasOrdenadas.forEach(r => {
-        tabla += `<tr><td>${r.pregunta}</td><td>${r.puntaje}</td></tr>`;
-      });
-      tabla += "</table>";
-
-      const element = document.createElement("div");
-      element.className = "pdf-report";
-      element.innerHTML = `
-        <h2>Informe BDI-II</h2>
-        <p><b>Nombre:</b> ${nombre}</p>
-        <p><b>Fecha de nacimiento:</b> ${fecha}</p>
-        <p><b>Puntaje total:</b> ${total}</p>
-        <p><b>Nivel de depresión:</b> ${nivel}</p>
-        ${ideacion ? `<p class="highlight">⚠ El paciente refiere ideación suicida.</p>` : ""}
-        <h3>Detalle de respuestas</h3>
-        ${tabla}
-        <div class="footer-note">
-          ⚠ Este informe es orientativo y no reemplaza una evaluación exhaustiva supervisada por un profesional de la salud mental.
-        </div>
-      `;
-
-      html2pdf().set({
-        margin: 1,
-        filename: `Informe_BDI_${nombre}.pdf`,
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' }
-      }).from(element).save();
-    }
-  </script>
+  const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
+  doc.save(nombreArchivo);
+}
+</script>
 </body>
 </html>
