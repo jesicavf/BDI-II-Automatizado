@@ -171,7 +171,7 @@ for(let valor=3; valor>=0; valor--){
   if(respuestasOrdenadas[valor].length > 0){
     // --- Subtítulo en negrita y un poco más grande ---
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
+    doc.setFontSize(12);
     escribirTexto(titulos[valor], false);
 
     // --- Volvemos al estilo normal para las respuestas ---
@@ -213,7 +213,7 @@ for(let valor=3; valor>=0; valor--){
   doc.setTextColor(150, 0, 0);
   escribirTexto("Aviso importante: Este cuestionario es una herramienta de autoevaluación con fines informativos. Sus resultados son orientativos y no constituyen un diagnóstico clínico. La interpretación corresponde únicamente a un/a profesional de la salud mental y no reemplaza una evaluación psicológica integral. Ante malestar significativo, se recomienda consultar a un/a psicólogo/a o médico/a especializado/a. La adaptación del instrumento pertenece a la Dra. María Elena Brenlla y esta adaptación se realiza únicamente con fines administrativos mediado por tecnología.", true);
   doc.setTextColor(0, 0, 0);
-  doc.setFontSize(12);
+  doc.setFontSize(8);
 
   // Autoría al pie
   doc.setFontSize(6);
