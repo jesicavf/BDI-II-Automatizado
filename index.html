@@ -138,8 +138,13 @@ document.getElementById("fnacimiento").addEventListener("change",()=>{
   }
 
   escribirTexto(`Nombre: ${nombre}`, true);
-  escribirTexto(`Fecha de nacimiento: ${fnacimiento}`, true);
-  escribirTexto(`Fecha de administración: ${fechaAdmin}`, true);
+doc.setFontSize(9);
+doc.setFont("helvetica", "normal");
+doc.setTextColor(0, 0, 0);
+
+let lineaFechas = `Fecha de nacimiento: ${fnacimiento}      |      Fecha de administración: ${fechaAdmin}`;
+escribirTexto(lineaFechas, true);
+
   y += 3;
   escribirTexto("Respuestas seleccionadas (ordenadas de mayor puntuación a menor puntuación):", true);
 
@@ -203,8 +208,9 @@ for(let valor=3; valor>=0; valor--){
   }
 
   y += 3;
-  escribirTexto(`Puntaje Directo: ${puntaje}`, true);
-  escribirTexto(`Interpretación: ${interpretacion}`, true);
+
+  let lineaResultados = `Puntaje Directo: ${puntaje}      |      Interpretación: ${interpretacion}`;
+escribirTexto(lineaResultados, true);
   escribirTexto(`Resumen: ${resumen}`, true);
   if(ideacionSuicida) escribirTexto("ALERTA: Se detecta ideación suicida. Evaluar con prioridad clínica.", true);
 
