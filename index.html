@@ -195,12 +195,22 @@ for(let valor=3; valor>=0; valor--){
   doc.setFontSize(12);
 
   // Autoría al pie
-doc.setFontSize(6);
-doc.setTextColor(100, 100, 100);
-doc.text("Autoría: Jésica Favara", pageWidth - 10, pageHeight - 10, { align: "right" });
+  doc.setFontSize(6);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Autoría: Jésica Favara", pageWidth - 10, pageHeight - 10, { align: "right" });
 
   const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
-  doc.save(nombreArchivo);
+
+  // --- SOLUCIÓN PARA FIREFOX Y MÓVILES ---
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(blobUrl);
 }
 </script>
 </body>
