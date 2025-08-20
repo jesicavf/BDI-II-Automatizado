@@ -32,7 +32,7 @@
 <form id="bdiForm"></form>
 <button type="button" onclick="generarPDF()">Descargar Informe PDF</button>
 
-<div class="autor">"Beck Depression Inventory (Second edition) Adaptación argentina: Lic. María Elena Brenlla. Adaptación digital: Lic. Jésica Favara"</div>
+<div class="autor">"Beck Depression Inventory (Second edition) Adaptación argentina: Dra. María Elena Brenlla. Versión digital: Mag. Jésica Favara"</div>
 
 <script>
 const preguntas = [
@@ -211,14 +211,14 @@ for(let valor=3; valor>=0; valor--){
   y += 5;
   doc.setFontSize(6);
   doc.setTextColor(150, 0, 0);
-  escribirTexto("Aviso importante: Este cuestionario es una herramienta de autoevaluación con fines informativos. Sus resultados son orientativos y no constituyen un diagnóstico clínico. La interpretación corresponde únicamente a un/a profesional de la salud mental y no reemplaza una evaluación psicológica integral. Ante malestar significativo, se recomienda consultar a un/a psicólogo/a o médico/a especializado/a. La adaptación del instrumento pertenece a la Dra. María Elena Brenlla y esta adaptación se realiza únicamente con fines administrativos mediado por tecnología.", true);
+  escribirTexto("Aviso importante: Este cuestionario es una herramienta de autoevaluación con fines informativos. Sus resultados son orientativos y no constituyen un diagnóstico clínico. La interpretación corresponde únicamente a un/a profesional de la salud mental y no reemplaza una evaluación psicológica integral. Ante malestar significativo, se recomienda consultar a un/a psicólogo/a o médico/a especializado/a. La adaptación del instrumento pertenece a la Dra. María Elena Brenlla y esta versión se realiza únicamente con findes didácticos.", true);
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(6);
 
   // Autoría al pie
   doc.setFontSize(6);
   doc.setTextColor(100, 100, 100);
-  doc.text("Beck Depression Inventory (Second edition) Adaptación argentina: Lic. María Elena Brenlla. Adaptación digital: Lic. Jésica Favara", pageWidth - 10, pageHeight - 10, { align: "right" });
+  doc.text("Beck Depression Inventory (Second edition) Adaptación argentina: Dra. María Elena Brenlla. Versión digital: Mag. Jésica Favara", pageWidth - 10, pageHeight - 10, { align: "right" });
 
   const nombreArchivo = `${nombre.replace(/ /g,"_")}_${fechaAdmin.replace(/\//g,"-")}_BDI-II.pdf`;
 
