@@ -159,12 +159,23 @@ for(let i=0;i<preguntas.length;i++){
   });
 }
 
-// Imprimir respuestas ordenadas: primero 3, luego 2, luego 1, luego 0
+// Imprimir respuestas ordenadas con subtítulos diferenciados
+const titulos = {
+  3: "Respuestas con valor 3 (máxima intensidad):",
+  2: "Respuestas con valor 2:",
+  1: "Respuestas con valor 1:",
+  0: "Respuestas con valor 0:"
+};
+
 for(let valor=3; valor>=0; valor--){
-  respuestasOrdenadas[valor].forEach(item => {
-    escribirTexto(`${item.numero}. ${item.pregunta} -> ${item.respuesta}`, true);
-  });
+  if(respuestasOrdenadas[valor].length > 0){
+    escribirTexto(titulos[valor], false); // subtítulo sin sombreado
+    respuestasOrdenadas[valor].forEach(item => {
+      escribirTexto(`${item.numero}. ${item.pregunta} -> ${item.respuesta}`, true);
+    });
+  }
 }
+
 
   let interpretacion="", resumen="";
   if(puntaje<=13){
