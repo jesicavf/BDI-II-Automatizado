@@ -114,12 +114,12 @@ function generarPDF() {
   // Encabezado azul
   doc.setFillColor(0, 102, 204);
   doc.rect(0, 0, pageWidth, 15, 'F');
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setTextColor(255,255,255);
   doc.text("Inventario de Depresión de Beck - II (BDI-II)", pageWidth/2, 11, {align: "center"});
   y += 20;
 
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
 
   function escribirTexto(texto, sombreado=false) {
@@ -171,12 +171,12 @@ for(let valor=3; valor>=0; valor--){
   if(respuestasOrdenadas[valor].length > 0){
     // --- Subtítulo en negrita y un poco más grande ---
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     escribirTexto(titulos[valor], false);
 
     // --- Volvemos al estilo normal para las respuestas ---
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
+    doc.setFontSize(10);
 
     respuestasOrdenadas[valor].forEach(item => {
       escribirTexto(`${item.numero}. ${item.pregunta} -> ${item.respuesta}`, true);
@@ -209,11 +209,11 @@ for(let valor=3; valor>=0; valor--){
 
   // Leyenda profesional en rojo
   y += 5;
-  doc.setFontSize(8);
+  doc.setFontSize(6);
   doc.setTextColor(150, 0, 0);
   escribirTexto("Aviso importante: Este cuestionario es una herramienta de autoevaluación con fines informativos. Sus resultados son orientativos y no constituyen un diagnóstico clínico. La interpretación corresponde únicamente a un/a profesional de la salud mental y no reemplaza una evaluación psicológica integral. Ante malestar significativo, se recomienda consultar a un/a psicólogo/a o médico/a especializado/a. La adaptación del instrumento pertenece a la Dra. María Elena Brenlla y esta adaptación se realiza únicamente con fines administrativos mediado por tecnología.", true);
   doc.setTextColor(0, 0, 0);
-  doc.setFontSize(8);
+  doc.setFontSize(6);
 
   // Autoría al pie
   doc.setFontSize(6);
