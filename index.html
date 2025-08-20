@@ -95,42 +95,11 @@ document.getElementById("fnacimiento").addEventListener("change",()=>{
   document.getElementById("edad").textContent = "Edad: "+edad+" años";
 });
 
-// Función PDF con diseño
-<script>
-function generarPDF() {
-  let valido = true;  // asumimos que está todo bien
-
-  // 🔴 Paso 1: validar todas las respuestas
-  if(!validarFormulario()) return;  
-
-  // 🔴 Paso 2: validar nombre
-  const nombreInput = document.getElementById("nombre");
-  if(nombreInput.value.trim() === ""){
-    nombreInput.style.border = "2px solid red";  // borde rojo
-    valido = false;
-  } else {
-    nombreInput.style.border = "";  // se limpia si está bien
-  }
-
-  // 🔴 Paso 3: validar fecha de nacimiento
-  const fnacimientoInput = document.getElementById("fnacimiento");
-  if(fnacimientoInput.value.trim() === ""){
-    fnacimientoInput.style.border = "2px solid red";
-    valido = false;
-  } else {
-    fnacimientoInput.style.border = "";
-  }
-
-  // 🔴 Si algo está mal, no sigue
-  if(!valido){
-    alert("Complete los campos en rojo antes de continuar.");
-    return;
-  }
-
-  // ✅ Si pasa todas las validaciones, sigue el proceso normal
-  alert("Todo completo, se genera el PDF...");
-}
-</script>
+// Función PDF con diseño 
+  function generarPDF() { 
+    const nombre = document.getElementById("nombre").value.trim(); 
+    const fnacimiento = document.getElementById("fnacimiento").value; 
+    if(!nombre || !fnacimiento){ alert("Complete nombre y fecha de nacimiento"); return; }
 
 
   const { jsPDF } = window.jspdf;
